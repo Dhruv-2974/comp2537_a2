@@ -3,17 +3,24 @@ const app = express()
 const https = require("https");
 const bodyparser = require("body-parser");
 app.set('view engine', 'ejs');
+const pokemon = require("./public/pokedata.js");
 
-app.set('view engine', 'ejs')
 
-app.listen(5001, function(err){
-    if(err) console.log(err);
-})
 
+app.listen(process.env.PORT || 5000, function (err) {
+    if (err) console.log(err);
+});
+
+// For parsing application/json
+app.use(express.json());
+
+// Connect to mongodb
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://localhost:27017/cluster0",
-    { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect("mongodb://localhost:27017/cluster0", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 const eventSchema = new mongoose.Schema({
     text: String,
     hits: Number,
@@ -22,18 +29,20 @@ const eventSchema = new mongoose.Schema({
 
 const eventModel = mongoose.model("timelineevents", eventSchema);
 
-app.use(express.static('./public'));
-
+// For parsing application/x-www-form-urlencoded
+app.use(express.urlencoded({
+    extended: true
+}));
 app.use(bodyparser.urlencoded({
     parameterLimit: 100000,
-    limit: '500mb',
+    limit: '50mb',
     extended: true
 }));
 
 
 // CRUD
-// R
-app.get('/timeline/getAllEvents', function (req, res) {
+// 1. Read
+app.get("/timeline/getAllEvents", function (req, res) {
     // console.log("received a request for "+ req.params.city_name);
     eventModel.find({}, function (err, data) {
         if (err) {
@@ -43,56 +52,85 @@ app.get('/timeline/getAllEvents', function (req, res) {
         }
         res.send(data);
     });
-})
+});
 
-//C
-app.put('/timeline/insert', function (req, res) {
-    console.log(req.body)
+// 2. Create
+app.put("/timeline/insert", function (req, res) {
+    console.log(req.body);
     eventModel.create({
-        text: req.body.text,
-        time: req.body.time,
-        hits: req.body.hits
-    }, function (err, data) {
-        if (err) {
-            console.log("Error " + err);
-        } else {
-            console.log("Data " + data);
+            text: req.body.text,
+            time: req.body.time,
+            hits: req.body.hits,
+        },
+        function (err, data) {
+            if (err) {
+                console.log("Error " + err);
+            } else {
+                console.log("Data " + data);
+            }
+            res.send(data);
         }
-        res.send(data);
-    });
-})
+    );
+});
 
-//U
-app.get('/timeline/inreaseHits/:id', function (req, res) {
-    console.log(req.params)
+// 3. Update
+app.get("/timeline/increaseHits/:id", function (req, res) {
+    console.log(req.params);
     eventModel.updateOne({
-       _id : req.params.id
-    }, {
-        $inc : { hits: 1}
-    }, function (err, data) {
-        if (err) {
-            console.log("Error " + err);
-        } else {
-            console.log("Data " + data);
+            _id: req.params.id,
+        }, {
+            $inc: {
+                hits: 1
+            },
+        },
+        function (err, data) {
+            if (err) {
+                console.log("Error " + err);
+            } else {
+                console.log("Data " + data);
+            }
+            res.send("Updated Successfully");
         }
-        res.send("Update is good!");
-    });
-})
+    );
+});
 
-//D
-app.get('/timeline/remove/:id', function (req, res) {
-    // console.log(req.params)
-    eventModel.remove({
-       _id : req.params.id
-    }, function (err, data) {
-        if (err) {
-            console.log("Error " + err);
-        } else {
-            console.log("Data " + data);
+// 3.5 Decrease hits
+app.get("/timeline/decreaseHits/:id", function (req, res) {
+    console.log(req.params);
+    eventModel.updateOne({
+            _id: req.params.id,
+        }, {
+            $inc: {
+                hits: -1
+            },
+        },
+        function (err, data) {
+            if (err) {
+                console.log("Error " + err);
+            } else {
+                console.log("Data " + data);
+            }
+            res.send("Updated Successfully");
         }
-        res.send("Delete is good!");
-    });
-})
+    );
+});
+
+// 4. Delete
+app.get("/timeline/remove/:id", function (req, res) {
+    // console.log(req.params);
+    eventModel.remove({
+            _id: req.params.id,
+        },
+        function (err, data) {
+            if (err) {
+                console.log("Error " + err);
+            } else {
+                console.log("Data " + data);
+            }
+            res.send("Deleted Successfully");
+        }
+    );
+});
 
 
 
@@ -101,16 +139,16 @@ app.get("/profile/:id", function (req, res) {
     const url = `https://pokeapi.co/api/v2/pokemon/${req.params.id}`
     data = ""
 
-    https.get(url, function(https_res) {
-        https_res.on("data", function(chunk){
+    https.get(url, function (https_res) {
+        https_res.on("data", function (chunk) {
             // console.log(JSON.parse(data))
             data += chunk;
         })
-        https_res.on("end", function (){
+        https_res.on("end", function () {
             // console.log(JSON.parse(data))
             data = JSON.parse(data)
 
-            z = data.stats.filter((obj_) =>{
+            z = data.stats.filter((obj_) => {
                 return obj_.stat.name == "hp"
             })
 
@@ -122,32 +160,32 @@ app.get("/profile/:id", function (req, res) {
                 return obj2.base_stat
             }))
 
-            tmp= data.stats.filter((obj_) =>{
+            tmp = data.stats.filter((obj_) => {
                 return obj_.stat.name == "hp"
             }).map((obj2) => {
                 return obj2.base_stat
             })
 
-            atk = data.stats.filter((obj) =>{
+            atk = data.stats.filter((obj) => {
                 return obj_.stat.name == "attack"
             }).map((obj2) => {
                 return obj2.basestat
             })
 
-            def = data.stats.filter((obj) =>{
+            def = data.stats.filter((obj) => {
                 return obj_.stat.name == "defense"
             }).map((obj2) => {
                 return obj2.basestat
             })
 
-            spd= data.stats.filter((obj) =>{
+            spd = data.stats.filter((obj) => {
                 return obj_.stat.name == "speed"
             }).map((obj2) => {
                 return obj2.base_stat
             })
 
             typeList = []
-            for(i=0; i<data.types.length; i++){
+            for (i = 0; i < data.types.length; i++) {
                 typeList.push(data.types[i].type.name)
             }
 
@@ -172,7 +210,7 @@ app.get("/profile/:id", function (req, res) {
 // HAS TO HAVE index.html INSIDE PUBLIC FOLDER
 app.use(express.static('public'));
 
-function f_1(){
+function f_1() {
     console.log("dummy middleware");
 }
 

@@ -1,0 +1,113 @@
+body {
+    background-color: #1f22d2;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'DotGothic16', sans-serif;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.box {
+    background-color: rgb(232, 68, 68);
+    width: 100%;
+    height: 60px;
+}
+
+h1 {
+    margin: 0px;
+    padding: 10px;
+    color: white;
+    font-family: 'Fredericka the Great', cursive;
+    text-align: center;
+}
+
+button {
+    font-family: 'Fredericka the Great', cursive;
+    background-color: white;
+    display: inline-block;
+    border-radius: 11px;
+    color: black;
+    transition-duration: 0.35s;
+    cursor: pointer;
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 13px;
+    margin: 4px 2px;
+}
+
+.LikeButton {
+    color: black;
+    border: 3px solid #de24c2;
+    color: #de24c2;
+}
+
+.LikeButton:hover {
+    background-color: #de24c2;
+    color: white;
+}
+
+.DislikeButton {
+    background-color: white;
+    color: black;
+    border: 3px solid #54b9b7;
+    color: #54b9b7;
+}
+
+.DislikeButton:hover {
+    background-color: #54b9b7;
+    color: white;
+}
+
+.DeleteButton {
+    background-color: white;
+    color: black;
+    border: 3px solid #d66620;
+    color: #d66620;
+}
+
+.DeleteButton:hover {
+    background-color: #d66620;
+    color: white;
+}
+
+.wrapper {
+    background-color: #f7f7ea;
+    padding: 33px;
+    margin: 33px;
+    width: 33%;
+    font-size: large;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.33s;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+
+
+
+p {
+    margin: 5px;
+    line-height: 30px;
+    letter-spacing: 1px;
+}
+
+@media screen and (max-width: 600px) {
+
+    main,
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        /* width: 100%; */
+    }
+
+}
